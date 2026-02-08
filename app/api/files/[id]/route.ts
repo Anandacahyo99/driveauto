@@ -27,3 +27,32 @@ export async function DELETE(
     );
   }
 }
+
+
+
+export async function PATCH(
+  req: Request,
+  { params }: { params: Promise<{ id: string }> } // 1. Ubah tipe data menjadi Promise
+) {
+  try {
+    // 2. Unwrapping params menggunakan await
+    const { id } = await params; 
+    const { newName } = await req.json();
+
+    if (!id || !newName) {
+      return NextResponse.json({ error: "ID atau nama baru diperlukan" }, { status: 400 });
+    }
+
+    const response = await drive.files.update({
+      fileId: id,
+      requestBody: {
+        name: newName,
+      },
+    });
+
+    return NextResponse.json({ success: true, file: response.data });
+  } catch (error) {
+    console.error("Ganti nama gagal:", error);
+    return NextResponse.json({ success: false, error: "Gagal ganti nama" }, { status: 500 });
+  }
+}
